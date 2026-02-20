@@ -67,7 +67,7 @@ def generate_launch_description():
             "base_frame": "base_link",
             "odom_frame": "odom",
             "map_frame": "map",
-            "laser_frame": "laser_link"
+            "laser_frame": "laser"
         }.items()
     )
 

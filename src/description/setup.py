@@ -10,7 +10,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/description']),
         ('share/description', ['package.xml']),
-        ('share/description/launch', ['launch/display.launch.py']),
+        ('share/description/launch', ['launch/description.launch.py']),
         ('share/description/urdf', ['urdf/robot.urdf']),
 
     ],
