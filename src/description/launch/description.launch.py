@@ -8,7 +8,7 @@ from ament_index_python.packages import get_package_share_directory
 def generate_launch_description():
 
     pkg_desc = get_package_share_directory('description')
-    urdf_file = os.path.join(pkg_desc, 'urdf', 'robot.urdf.xacro')
+    urdf_file = os.path.join(pkg_desc, 'urdf', 'robot_real.urdf.xacro')
 
     return LaunchDescription([
         Node(
