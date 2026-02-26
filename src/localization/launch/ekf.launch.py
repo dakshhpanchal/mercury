@@ -5,8 +5,8 @@ import os
 
 def generate_launch_description():
 
-    pkg_loc = get_package_share_directory('localization')
-    ekf_yaml = os.path.join(pkg_loc, 'config', 'ekf.yaml')
+    pkg_localization = get_package_share_directory('localization')
+    ekf_yaml = os.path.join(pkg_localization, 'config', 'ekf.yaml')
 
     ekf_node = Node(
         package='robot_localization',
