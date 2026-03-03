@@ -3,7 +3,6 @@
 
   <xacro:macro name="sensors">
 
-    <!-- ================= IMU ================= -->
     <gazebo reference="imu_link">
       <sensor name="imu_sensor" type="imu">
         <always_on>true</always_on>
@@ -12,7 +11,6 @@
       </sensor>
     </gazebo>
 
-    <!-- ================= GPS ================= -->
     <gazebo reference="gps_link">
       <sensor name="gps_sensor" type="navsat">
         <always_on>true</always_on>
@@ -21,14 +19,13 @@
       </sensor>
     </gazebo>
 
-    <!-- ================= LIDAR ================= -->
     <gazebo reference="lidar_link">
       <sensor name="lidar_sensor" type="gpu_lidar">
         <always_on>true</always_on>
         <update_rate>10</update_rate>
         <topic>/scan</topic>
         <visualize>true</visualize>
-
+        <frame_id>lidar_link</frame_id>
         <lidar>
           <scan>
             <horizontal>
@@ -49,7 +46,6 @@
       </sensor>
     </gazebo>
 
-    <!-- ================= CAMERA ================= -->
     <gazebo reference="camera_link">
       <sensor name="camera_sensor" type="camera">
         <always_on>true</always_on>

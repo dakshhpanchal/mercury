@@ -5,10 +5,8 @@ from ament_index_python.packages import get_package_share_directory
 import os
 import xacro
 
-
 def generate_launch_description():
 
-    # ================= ROBOT DESCRIPTION =================
     pkg_desc = get_package_share_directory('description')
     xacro_file = os.path.join(pkg_desc, 'urdf', 'robot.urdf.xacro')
 
@@ -17,7 +15,6 @@ def generate_launch_description():
         mappings={}
     ).toxml()
 
-    # ================= WORLD FILE =================
     world_file = os.path.join(
         os.getcwd(),
         'src',
@@ -28,13 +25,11 @@ def generate_launch_description():
 
     return LaunchDescription([
 
-        # Start Gazebo with YOUR world
         ExecuteProcess(
             cmd=['gz', 'sim', '-r', world_file],
             output='screen'
         ),
 
-        # Bridge topics between Gazebo and ROS2
         Node(
             package='ros_gz_bridge',
             executable='parameter_bridge',
@@ -44,12 +39,12 @@ def generate_launch_description():
                 '/imu@sensor_msgs/msg/Imu@gz.msgs.IMU',
                 '/gps@sensor_msgs/msg/NavSatFix@gz.msgs.NavSat',
                 '/scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan',
-                '/camera/image_raw@sensor_msgs/msg/Image@gz.msgs.Image'
+                '/camera/image_raw@sensor_msgs/msg/Image@gz.msgs.Image',
             ],
+            parameters=[{'use_sim_time': True}],
             output='screen'
         ),
-
-        # Spawn robot into Gazebo
+        
         Node(
             package='ros_gz_sim',
             executable='create',
@@ -57,6 +52,7 @@ def generate_launch_description():
                 '-topic', 'robot_description',
                 '-name', 'skid_steer_bot'
             ],
+            parameters=[{'use_sim_time': True}],
             output='screen'
         ),
 
