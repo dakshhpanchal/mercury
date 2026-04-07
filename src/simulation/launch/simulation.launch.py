@@ -94,6 +94,7 @@ def generate_launch_description():
                 '/gps@sensor_msgs/msg/NavSatFix@gz.msgs.NavSat',
                 '/scan@sensor_msgs/msg/LaserScan@gz.msgs.LaserScan',
                 '/camera/image_raw@sensor_msgs/msg/Image@gz.msgs.Image',
+                '/side_camera/image_raw@sensor_msgs/msg/Image@gz.msgs.Image',
                 '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
                 '/tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
             ],
