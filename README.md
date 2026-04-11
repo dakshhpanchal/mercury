@@ -1,93 +1,188 @@
-# mercury
-offical repo for ICMTC UGVC-2026
+````markdown
+# mercury  
+Official repository for **ICMTC UGVC-2026**
 
-# How to run docker
+---
 
-```
-sudo docker compose build 
-sudo docker compose run ros
-```
+## Prerequisites
 
-# How to run simulation
+- Ubuntu 22.04 / 24.04  
+- ROS 2 Jazzy  
+- colcon  
+- rosdep  
+- Docker (optional)
 
-```
-echo 'export GZ_SIM_RESOURCE_PATH=$(ros2 pkg prefix simulation)/share/simulation/models:$GZ_SIM_RESOURCE_PATH' >> ~/.bashrc
+---
+
+## First-Time Setup (Fresh Clone)
+
+> This repository **is already a ROS 2 workspace** (contains `src/`)
+
+```bash
+# Clone workspace
+git clone <repo-url>
+cd mercury
+
+# Source ROS
+source /opt/ros/jazzy/setup.bash
+
+# Install dependencies
+rosdep install --from-paths src --ignore-src -r -y
+
+# Build workspace
 colcon build
-ros2 launch bringup bringup_sim.launch.py
+
+# Source workspace
+source install/setup.bash
 ```
 
-# Add this to your bashrc/zshrc
-```
+---
+
+## Environment Setup
+
+Add all required environment variables to your `~/.bashrc` or `~/.zshrc`:
+
+```bash
+# ROS
+source /opt/ros/jazzy/setup.bash
+
+# Workspace
+source ~/mercury/install/setup.bash
+
+# Gazebo resource path
+export GZ_SIM_RESOURCE_PATH=$(ros2 pkg prefix simulation)/share/simulation/models:$GZ_SIM_RESOURCE_PATH
+
+# Gazebo system plugins
 export GZ_SIM_SYSTEM_PLUGIN_PATH=/opt/ros/jazzy/lib
 ```
 
+Apply changes:
+
+```bash
+source ~/.bashrc
+```
+
+---
+
+## Running with Docker
+
+```bash
+sudo docker compose build
+sudo docker compose run ros
+```
+
+---
+
+## Running Simulation
+
+```bash
+cd mercury
+source install/setup.bash
+
+ros2 launch bringup bringup_sim.launch.py
+```
+
+---
 
 # watchdog_monitor
 
-A non-intrusive ROS2 monitoring and observability package for the Mercury robot.
-Runs alongside the existing stack without modifying any control logic.
+A non-intrusive ROS 2 monitoring and observability package for the Mercury robot.  
+Runs alongside the existing stack without modifying control logic.
 
 ---
 
-# Nodes
+## Nodes
 
-| Node                     | Publishes                               | Rate         | Description                                                    |
-| ------------------------ | --------------------------------------- | ------------ | -------------------------------------------------------------- |
-| `system_monitor_node`    | `/system_status`                        | 2s           | Tracks running vs expected nodes, publishes JSON health report |
-| `watchdog_node`          | `/system_alerts`                        | 3s           | Detects node crashes, topic silences, TF failures              |
-| `waypoint_detector_node` | `/waypoint_reached`, `/waypoint_status` | 10Hz / 1Hz   | Detects robot arrival at predefined waypoints                  |
-| `control_listener_node`  | —                                       | event-driven | Passive observer, logs all monitoring events                   |
-| `monitoring_dashboard`   | —                                       | 1Hz          | Live terminal dashboard                                   |
+| Node                     | Publishes                               | Rate         | Description                                                |
+| ------------------------ | --------------------------------------- | ------------ | ---------------------------------------------------------- |
+| `system_monitor_node`    | `/system_status`                        | 2s           | Tracks running vs expected nodes and publishes JSON health |
+| `watchdog_node`          | `/system_alerts`                        | 3s           | Detects node crashes, topic silence, TF failures           |
+| `waypoint_detector_node` | `/waypoint_reached`, `/waypoint_status` | 10Hz / 1Hz   | Detects arrival at predefined waypoints                    |
+| `control_listener_node`  | —                                       | Event-driven | Passive observer logging monitoring events                 |
+| `monitoring_dashboard`   | —                                       | 1Hz          | Live terminal dashboard                                    |
 
 ---
 
-# Quick Start
+## Quick Start
 
 ```bash
-# Build
 colcon build --packages-select watchdog_monitor
 source install/setup.bash
 
-# Launch everything
 ros2 launch watchdog_monitor monitoring_all.launch.py
-
-# Launch dashboard (separate terminal)
 ros2 launch watchdog_monitor dashboard.launch.py
 ```
 
 ---
 
-# Launch Arguments
+## Launch Arguments
 
-| Argument           | Default                       | Description                              |
-| ------------------ | ----------------------------- | ---------------------------------------- |
-| `monitor_interval` | `2.0`                         | Node health check interval (s)           |
-| `topic_timeout`    | `5.0`                         | Topic silence threshold before alert (s) |
-| `arrival_radius`   | `0.5`                         | Waypoint detection radius (m)            |
-| `odom_topic`       | `/diff_drive_controller/odom` | Odometry source topic                    |
+| Argument           | Default                       | Description                          |
+| ------------------ | ----------------------------- | ------------------------------------ |
+| `monitor_interval` | `2.0`                         | Node health check interval (seconds) |
+| `topic_timeout`    | `5.0`                         | Topic silence threshold (seconds)    |
+| `arrival_radius`   | `0.5`                         | Waypoint detection radius (meters)   |
+| `odom_topic`       | `/diff_drive_controller/odom` | Odometry source topic                |
 
 ---
 
-# Waypoint Configuration
+## Waypoint Configuration
 
-Edit `config/waypoints.yaml` to define waypoints in your map frame:
+Edit `config/waypoints.yaml`:
 
 ```yaml
 waypoint_detector_node:
   ros__parameters:
-    waypoints: [2.0, 0.0, 2.0, 4.0, 0.0, 4.0]  # [x1,y1, x2,y2, ...]
+    waypoints: [2.0, 0.0, 2.0, 4.0, 0.0, 4.0]
     waypoint_names: ["WP-1", "WP-2", "WP-3"]
     arrival_radius: 0.5
 ```
 
 ---
 
-# Topic Reference
+## Topics
 
-| Topic               | Type                     | Published by             |
+| Topic               | Type                     | Publisher                |
 | ------------------- | ------------------------ | ------------------------ |
 | `/system_status`    | `std_msgs/String` (JSON) | `system_monitor_node`    |
 | `/system_alerts`    | `std_msgs/String` (JSON) | `watchdog_node`          |
 | `/waypoint_reached` | `std_msgs/String` (JSON) | `waypoint_detector_node` |
 | `/waypoint_status`  | `std_msgs/String` (JSON) | `waypoint_detector_node` |
 
+---
+
+## Sending Navigation Goal
+
+```bash
+ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose \
+"{pose: {header: {frame_id: 'map'}, pose: {position: {x: 25.0, y: 1.0, z: 0.0}, orientation: {z: 0.0, w: 1.0}}}}"
+```
+
+---
+
+## Troubleshooting
+
+### Package not found
+```bash
+source install/setup.bash
+```
+
+### Dependencies missing
+```bash
+rosdep install --from-paths src --ignore-src -r -y
+```
+
+### Gazebo models not loading
+```bash
+echo $GZ_SIM_RESOURCE_PATH
+```
+
+---
+
+## Clean Build
+
+```bash
+rm -rf build/ install/ log/
+colcon build
+```
+````
