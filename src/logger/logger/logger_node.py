@@ -61,62 +61,33 @@ class LoggerNode(Node):
         self.get_logger().info(f"{label}: {json_line}")
 
     def system_cb(self, msg):
-        self._write(self.system_file, {
-            "time": self._time(),
-            "system_status": msg.data
-        }, "SYSTEM")
+        self._write(self.system_file, {"time": self._time(), "system_status": msg.data}, "SYSTEM")
 
     def alert_cb(self, msg):
-        self._write(self.alert_file, {
-            "time": self._time(),
-            "alert": msg.data
-        }, "ALERT")
+        self._write(self.alert_file, {"time": self._time(), "alert": msg.data}, "ALERT")
 
     def imu_cb(self, msg):
         self._write(self.state_file, {
             "time": self._time(),
             "imu": {
-                "orientation": [
-                    float(msg.orientation.x),
-                    float(msg.orientation.y),
-                    float(msg.orientation.z),
-                    float(msg.orientation.w)
-                ],
-                "angular_velocity": [
-                    float(msg.angular_velocity.x),
-                    float(msg.angular_velocity.y),
-                    float(msg.angular_velocity.z)
-                ],
-                "linear_acceleration": [
-                    float(msg.linear_acceleration.x),
-                    float(msg.linear_acceleration.y),
-                    float(msg.linear_acceleration.z)
-                ]
+                "orientation": [msg.orientation.x, msg.orientation.y, msg.orientation.z, msg.orientation.w],
+                "angular_velocity": [msg.angular_velocity.x, msg.angular_velocity.y, msg.angular_velocity.z],
+                "linear_acceleration": [msg.linear_acceleration.x, msg.linear_acceleration.y, msg.linear_acceleration.z]
             }
         }, "IMU")
 
     def gps_cb(self, msg):
         self._write(self.state_file, {
             "time": self._time(),
-            "gps": {
-                "lat": float(msg.latitude),
-                "lon": float(msg.longitude),
-                "alt": float(msg.altitude)
-            }
+            "gps": {"lat": msg.latitude, "lon": msg.longitude, "alt": msg.altitude}
         }, "GPS")
 
     def odom_cb(self, msg):
         self._write(self.state_file, {
             "time": self._time(),
             "odom": {
-                "pos": [
-                    float(msg.pose.pose.position.x),
-                    float(msg.pose.pose.position.y)
-                ],
-                "vel": [
-                    float(msg.twist.twist.linear.x),
-                    float(msg.twist.twist.angular.z)
-                ]
+                "pos": [msg.pose.pose.position.x, msg.pose.pose.position.y],
+                "vel": [msg.twist.twist.linear.x, msg.twist.twist.angular.z]
             }
         }, "ODOM")
 
@@ -124,9 +95,9 @@ class LoggerNode(Node):
         self._write(self.encoder_file, {
             "time": self._time(),
             "encoder": {
-                "names": list(msg.name),
-                "position": [float(x) for x in msg.position],
-                "velocity": [float(x) for x in msg.velocity]
+                "names": msg.name,
+                "position": list(msg.position),
+                "velocity": list(msg.velocity)
             }
         }, "ENCODER")
 
@@ -134,8 +105,8 @@ class LoggerNode(Node):
         self._write(self.control_file, {
             "time": self._time(),
             "cmd_vel": {
-                "linear": float(msg.linear.x),
-                "angular": float(msg.angular.z)
+                "linear": msg.linear.x,
+                "angular": msg.angular.z
             }
         }, "CMD")
 
@@ -143,28 +114,24 @@ class LoggerNode(Node):
         self._write(self.control_file, {
             "time": self._time(),
             "cmd_vel_nav": {
-                "linear": float(msg.linear.x),
-                "angular": float(msg.angular.z)
+                "linear": msg.linear.x,
+                "angular": msg.angular.z
             }
         }, "CMD_NAV")
 
     def goal_cb(self, msg):
         self._write(self.nav_file, {
             "time": self._time(),
-            "goal": {
-                "x": float(msg.pose.position.x),
-                "y": float(msg.pose.position.y)
-            }
+            "goal": {"x": msg.pose.position.x, "y": msg.pose.position.y}
         }, "GOAL")
 
     def nav_status_cb(self, msg):
         statuses = []
         for s in msg.status_list:
             statuses.append({
-                "status": int(s.status),
-                "goal_id": [int(x) for x in s.goal_info.goal_id.uuid]
+                "status": s.status,
+                "goal_id": list(s.goal_info.goal_id.uuid)
             })
-
         self._write(self.nav_file, {
             "time": self._time(),
             "nav_status": statuses
@@ -173,8 +140,8 @@ class LoggerNode(Node):
     def system_resource_cb(self):
         self._write(self.resource_file, {
             "time": self._time(),
-            "cpu": float(psutil.cpu_percent()),
-            "memory": float(psutil.virtual_memory().percent)
+            "cpu": psutil.cpu_percent(),
+            "memory": psutil.virtual_memory().percent
         }, "SYS_RESOURCE")
 
     def power_cb(self):
@@ -191,7 +158,6 @@ def main():
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
-
 
 if __name__ == '__main__':
     main()
